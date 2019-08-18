@@ -1,6 +1,7 @@
 import os
 from gooey import Gooey, GooeyParser
 import tempfile
+import datetime
 
 @Gooey(optional_cols=2, program_name="crop minidv with subtitles",default_size=(610, 800))
 def main():
@@ -12,20 +13,20 @@ def main():
     p = GooeyParser(description='Crop MiniDV file', epilog = epilog)
     p.add_argument('--start', help='start timecode', type=str, required=False)
     #p.add_argument('--t', help='duration timecode', type=str, required=True)
-    p.add_argument('--to', help='end timecode', type=str, required=True)
+    p.add_argument('--to', help='end timecode', type=str, required=False)
 
     p.add_argument('--src', help='Source video file', type=str, required=True, widget="FileChooser")
     #p.add_argument('--result', help='result video file (may be blank)', type=str, required=False, widget="FileChooser")
-    p.add_argument('--codename', help='output video format', type=str, required=True)
+    p.add_argument('--codename', help='output video format', type=str, required=False)
 
-    p.add_argument('--preset', help='codenamt for output file', type=str, choices=['copy_dv', 'mp4','srt_test' ], required=False,widget="Dropdown")
+    p.add_argument('--preset', help='codenamt for output file', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint' ], required=False,widget="Dropdown")
 
     args = p.parse_args()
 
     #print args
 
     src = args.src
-    to = args.to
+    #to = args.to
 
 
 
@@ -33,6 +34,13 @@ def main():
         start = args.start
     else:
         start = '0:0:0'
+
+
+    if args.to is not None:
+        to = args.to
+    else:
+        to = None
+
 
     if args.codename is not None:
         codename = args.codename
@@ -51,6 +59,37 @@ def main():
     if preset == 'copy_dv':
         cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} -vcodec copy -acodec copy "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result)
+        print cmd
+        os.system(cmd)
+    if preset == 'indexprint':
+        ffopts=""
+
+        ffopts+=' -filter:v "setpts=PTS/50"'   # de-interlacing
+
+        # FILTERS
+        ffopts+=" -vf yadif"   # de-interlacing
+
+        # VIDEO ENCODING OPTIONS
+        ffopts+=" -vcodec libx264"
+        #ffopts+=" -preset slower"  # balance encoding speed vs compression ratio
+        ffopts+=" -profile:v main -level 3.0 "  # compatibility, see https://trac.ffmpeg.org/wiki/Encode/H.264
+        ffopts+=" -pix_fmt yuv420p"  # pixel format of MiniDV is yuv411, x264 supports yuv420
+        ffopts+=" -crf 23"  # The constant quality setting. Higher value = less quality, smaller file. Lower = better quality, bigger file. Sane values are [18 - 24]
+        ffopts+=" -x264-params ref=4"
+        ffopts+=" -tune film"
+
+        # AUDIO ENCODING OPTIONS
+        ffopts+=" -an"
+
+        # GENERIC OPTIONS
+        ffopts+=" -movflags faststart"  # Run a second pass moving the index (moov atom) to the beginning of the file.
+
+        result = change_filename_extension(result,'.mp4')
+
+        part_to = ''
+        if to is not None: part_to = ' -to ' + to + ' '
+        cmd = 'ffmpeg -i "{src}" -ss {start} {part_to} {ffopts} "{result}"'
+        cmd = cmd.format(src=src, start=start, to=to, result = result, part_to=part_to,ffopts=ffopts)
         print cmd
         os.system(cmd)
     elif preset == 'srt_test':
@@ -130,6 +169,7 @@ def change_filename_extension(source,new_extension):
     pre, ext = os.path.splitext(source)
     new_filename = pre + new_extension
     return new_filename
+
 
 if __name__ == '__main__':
     main()
