@@ -137,7 +137,7 @@ def main():
 
         # GENERIC OPTIONS
         ffopts+=" -movflags faststart "  # Run a second pass moving the index (moov atom) to the beginning of the file.
-        ffoprs+=" -threads 4"
+        ffopts+=" -threads 4"
         result = change_filename_extension(result,'.mp4')
 
         cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
