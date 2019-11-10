@@ -122,8 +122,7 @@ def main():
         
     elif preset == 'twitter':
         ffopts=""
-# -pattern_type glob -framerate 5 -pix_fmt yuv420p -i 'frames/*/*.jpeg' -i audio/audio.wav -filter_complex "[1:0]apad" 
-#-shortest -c:a aac -b:a 528k -c:v libx264 -crf 17 -s 1920x1080 -movflags +faststart -r 25 output.mp4
+
         # FILTERS
         ffopts+="-vf yadif"   # de-interlacing
         ffopts+=''' -filter:v "minterpolate='mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=60'" '''
@@ -144,7 +143,7 @@ def main():
         ffopts+=" -ac 2 -ar 24000 -ab 80k"  # 2 channels, 24k sample rate, 80k bitrate
 
         # GENERIC OPTIONS
-        ffopts+=" -movflags faststart"  # Run a second pass moving the index (moov atom) to the beginning of the file.
+        ffopts+=" -movflags faststart -threads 4"  # Run a second pass moving the index (moov atom) to the beginning of the file.
 
         result = change_filename_extension(result,'.mp4')
 
