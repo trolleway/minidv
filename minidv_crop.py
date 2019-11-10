@@ -138,6 +138,8 @@ def main():
 #-shortest -c:a aac -b:a 528k -c:v libx264 -crf 17 -s 1920x1080 -movflags +faststart -r 25 output.mp4
         # FILTERS
         ffopts+="-vf yadif"   # de-interlacing
+        ffopts+="-vf minterpolate='fps=60'"# interpolate fps
+        
 
         # VIDEO ENCODING OPTIONS
         ffopts+=" -vcodec libx264"
