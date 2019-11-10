@@ -12,13 +12,9 @@ def main():
     '''
     p = GooeyParser(description='Crop MiniDV file', epilog = epilog)
     p.add_argument('--start', help='start timecode', type=str, required=False)
-    #p.add_argument('--t', help='duration timecode', type=str, required=True)
     p.add_argument('--to', help='end timecode', type=str, required=False)
-
     p.add_argument('--src', help='Source video file', type=str, required=True, widget="FileChooser")
-
-
-    p.add_argument('--preset', help='codenamt for output file', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint','twitter' ], required=False,widget="Dropdown")
+    p.add_argument('--preset', help='encoding preset', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint','twitter' ], required=False,widget="Dropdown")
 
     args = p.parse_args()
 
@@ -27,13 +23,10 @@ def main():
     src = args.src
     #to = args.to
 
-
-
     if args.start is not None:
         start = args.start
     else:
         start = '0:0:0'
-
 
     if args.to is not None:
         to = args.to
@@ -143,8 +136,8 @@ def main():
         ffopts+=" -ac 2 -ar 24000 -ab 80k"  # 2 channels, 24k sample rate, 80k bitrate
 
         # GENERIC OPTIONS
-        ffopts+=" -movflags faststart -threads 4"  # Run a second pass moving the index (moov atom) to the beginning of the file.
-
+        ffopts+=" -movflags faststart "  # Run a second pass moving the index (moov atom) to the beginning of the file.
+        ffoprs+=" -threads 4"
         result = change_filename_extension(result,'.mp4')
 
         cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
