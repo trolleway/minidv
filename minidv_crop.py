@@ -14,7 +14,7 @@ def main():
     p.add_argument('--start', help='start timecode', type=str, required=False)
     p.add_argument('--to', help='end timecode', type=str, required=False)
     p.add_argument('--src', help='Source video file', type=str, required=True, widget="FileChooser")
-    p.add_argument('--preset', help='encoding preset', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint','twitter' ], required=False,widget="Dropdown")
+    p.add_argument('--preset', help='encoding preset', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint','twitter','iterpolate_60fps' ], required=False,widget="Dropdown")
 
     args = p.parse_args()
 
@@ -118,9 +118,7 @@ def main():
 
         # FILTERS
         ffopts+="-vf yadif"   # de-interlacing
-        ffopts+=''' -filter:v "minterpolate='mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=60'" '''
-
-        
+       
 
         # VIDEO ENCODING OPTIONS
         ffopts+=" -vcodec libx264"
@@ -145,6 +143,36 @@ def main():
         print cmd
         os.system(cmd)
 
+    elif preset == 'interpolate_60fps':
+        ffopts=""
+
+        # FILTERS
+
+        ffopts+=''' -filter:v "minterpolate='mi_mode=mci:mc_mode=aobmc:vsbmc=1:fps=60'" '''
+
+        # VIDEO ENCODING OPTIONS
+        ffopts+=" -vcodec libx264"
+
+        ffopts+=" -profile:v main -level 3.0 "  # compatibility, see https://trac.ffmpeg.org/wiki/Encode/H.264
+        ffopts+=" -pix_fmt yuv420p"  # pixel format of MiniDV is yuv411, x264 supports yuv420
+        ffopts+=" -crf 18"  # The constant quality setting. Higher value = less quality, smaller file. Lower = better quality, bigger file. Sane values are [18 - 24]
+        ffopts+=" -x264-params ref=4"
+        ffopts+=" -tune film"
+
+        # AUDIO ENCODING OPTIONS
+        ffopts+=" -acodec aac"
+        ffopts+=" -ac 2 -ar 24000 -ab 80k"  # 2 channels, 24k sample rate, 80k bitrate
+
+        # GENERIC OPTIONS
+        ffopts+=" -movflags faststart "  # Run a second pass moving the index (moov atom) to the beginning of the file.
+        ffopts+=" -threads 4"
+        result = change_filename_extension(result,'.mp4')
+
+        cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
+        cmd = cmd.format(src=src, start=start, to=to, result = result,ffopts=ffopts)
+        print cmd
+        os.system(cmd)
+        
     quit()
     if dvgrab_srt_found(src):
         print("convert source to temporary compressed file with embded subtitle stream")
