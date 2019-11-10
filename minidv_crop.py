@@ -29,16 +29,16 @@ def main():
         start = '0:0:0'
 
     if args.to is not None:
-        to = args.to
+        to = ' -to ' + str(args.to)
     else:
-        to = None
+        to = ''
 
     codename = str(datetime.datetime.now())
     result = generate_result_filename(src,codename)
 
     preset = args.preset
     if preset == 'copy_dv':
-        cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} -vcodec copy -acodec copy "{result}"'
+        cmd = 'ffmpeg -i "{src}" -ss {start} {to} -vcodec copy -acodec copy "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result)
         print cmd
         os.system(cmd)
@@ -79,7 +79,7 @@ def main():
         result = change_filename_extension(result,'.mp4')
         subtitle_file = os.path.splitext(src)[0]+'.srt0'
 
-        cmd = 'ffmpeg -i "{src}" -i "{subtitle_file}" -ss {start} -to {to} {ffopts} -vcodec copy -acodec copy "{result}"'
+        cmd = 'ffmpeg -i "{src}" -i "{subtitle_file}" -ss {start} {to} {ffopts} -vcodec copy -acodec copy "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result,ffopts=ffopts, subtitle_file = subtitle_file)
         print cmd
         os.system(cmd)
@@ -108,7 +108,7 @@ def main():
 
         result = change_filename_extension(result,'.mp4')
 
-        cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
+        cmd = 'ffmpeg -i "{src}" -ss {start} {to} {ffopts} "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result,ffopts=ffopts)
         print cmd
         os.system(cmd)
@@ -138,7 +138,7 @@ def main():
         ffopts+=" -threads 4"
         result = change_filename_extension(result,'.mp4')
 
-        cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
+        cmd = 'ffmpeg -i "{src}" -ss {start}  {to} {ffopts} "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result,ffopts=ffopts)
         print cmd
         os.system(cmd)
@@ -168,7 +168,7 @@ def main():
         ffopts+=" -threads 4"
         result = change_filename_extension(result,'.mp4')
 
-        cmd = 'ffmpeg -i "{src}" -ss {start} -to {to} {ffopts} "{result}"'
+        cmd = 'ffmpeg -i "{src}" -ss {start} {to} {ffopts} "{result}"'
         cmd = cmd.format(src=src, start=start, to=to, result = result,ffopts=ffopts)
         print cmd
         os.system(cmd)
