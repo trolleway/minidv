@@ -16,8 +16,7 @@ def main():
     p.add_argument('--to', help='end timecode', type=str, required=False)
 
     p.add_argument('--src', help='Source video file', type=str, required=True, widget="FileChooser")
-    #p.add_argument('--result', help='result video file (may be blank)', type=str, required=False, widget="FileChooser")
-    p.add_argument('--codename', help='output video format', type=str, required=False)
+
 
     p.add_argument('--preset', help='codenamt for output file', type=str, choices=['copy_dv', 'mp4','srt_test','indexprint','twitter' ], required=False,widget="Dropdown")
 
@@ -41,19 +40,8 @@ def main():
     else:
         to = None
 
-
-    if args.codename is not None:
-        codename = args.codename
-    else:
-        codename = str(datetime.datetime.now())
-    '''
-    if args.result is not None:
-        result = args.result
-    else:
-        result = generate_result_filename(src,codename)
-    '''
+    codename = str(datetime.datetime.now())
     result = generate_result_filename(src,codename)
-
 
     preset = args.preset
     if preset == 'copy_dv':
